@@ -2,6 +2,9 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { pool } from "./config/db";
+import authRoutes from "./routes/auth.routes";
+import { authenticate, AuthUser } from "./middleware/auth";
+import eventRoutes from "./routes/events.routes";
 
 dotenv.config();
 
@@ -15,6 +18,8 @@ app.use(
 );
 
 app.use(express.json());
+app.use("/api/auth", authRoutes);
+app.use("/api/events", eventRoutes);
 
 app.get("/", (_req, res) => {
   res.json({
@@ -46,6 +51,15 @@ app.get("/api/health/db", async (_req, res) => {
       message: "Database connection failed",
     });
   }
+});
+
+app.get("/api/auth/me", authenticate, (_req, res) => {
+  const user = res.locals.user as AuthUser;
+
+  res.json({
+    message: "Authenticated successfully",
+    user,
+  });
 });
 
 app.listen(PORT, () => {
