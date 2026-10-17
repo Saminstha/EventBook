@@ -1,21 +1,10 @@
 import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { z } from "zod";
 import { findUserByEmail, registerUser } from "../services/auth.service";
+import { registerSchema, loginSchema } from "../schemas/auth.schema";
 
 const router = Router();
-
-const registerSchema = z.object({
-  name: z.string().trim().min(2).max(100),
-  email: z.string().trim().email().max(255),
-  password: z.string().min(8).max(72),
-});
-
-const loginSchema = z.object({
-  email: z.string().trim().email().max(255),
-  password: z.string().min(1).max(72),
-});
 
 function createAccessToken(user: { id: string; role: "user" | "admin" }) {
   const secret = process.env.JWT_SECRET;
@@ -61,9 +50,7 @@ router.post("/register", async (req, res) => {
     }
 
     console.error("Registration failed:", error);
-    res.status(500).json({
-      message: "Unable to register account",
-    });
+    res.status(500).json({ message: "Unable to register account" });
   }
 });
 
@@ -71,9 +58,7 @@ router.post("/login", async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
 
   if (!parsed.success) {
-    res.status(400).json({
-      message: "Invalid login details",
-    });
+    res.status(400).json({ message: "Invalid login details" });
     return;
   }
 
@@ -84,9 +69,7 @@ router.post("/login", async (req, res) => {
       !user ||
       !(await bcrypt.compare(parsed.data.password, user.password_hash))
     ) {
-      res.status(401).json({
-        message: "Invalid email or password",
-      });
+      res.status(401).json({ message: "Invalid email or password" });
       return;
     }
 
@@ -107,9 +90,7 @@ router.post("/login", async (req, res) => {
     });
   } catch (error) {
     console.error("Login failed:", error);
-    res.status(500).json({
-      message: "Unable to log in",
-    });
+    res.status(500).json({ message: "Unable to log in" });
   }
 });
 

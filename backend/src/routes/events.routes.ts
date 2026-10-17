@@ -1,19 +1,12 @@
 import { Router } from "express";
-import { z } from "zod";
 import { getEventById, getEvents } from "../services/event.service";
+import { listEventsQuerySchema } from "../schemas/event.schema";
+import { uuidSchema } from "../schemas/common.schema";
 
 const router = Router();
 
-const listQuerySchema = z.object({
-  search: z.string().trim().max(100).optional().default(""),
-  page: z.coerce.number().int().min(1).optional().default(1),
-  limit: z.coerce.number().int().min(1).max(50).optional().default(10),
-});
-
-const uuidSchema = z.string().uuid();
-
 router.get("/", async (req, res) => {
-  const parsed = listQuerySchema.safeParse(req.query);
+  const parsed = listEventsQuerySchema.safeParse(req.query);
 
   if (!parsed.success) {
     res.status(400).json({
@@ -25,7 +18,6 @@ router.get("/", async (req, res) => {
 
   try {
     const result = await getEvents(parsed.data);
-
     res.json(result);
   } catch (error) {
     console.error("Failed to fetch events:", error);
