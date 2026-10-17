@@ -12,7 +12,6 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:3000",
@@ -21,20 +20,15 @@ app.use(
 
 app.use(express.json());
 
-// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin", adminRoutes);
 
-// Root endpoint
 app.get("/", (_req, res) => {
-  res.json({
-    message: "EventBook API is running",
-  });
+  res.json({ message: "EventBook API is running" });
 });
 
-// General health check
 app.get("/api/health", (_req, res) => {
   res.json({
     status: "ok",
@@ -42,7 +36,6 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-// Database health check
 app.get("/api/health/db", async (_req, res) => {
   try {
     const result = await pool.query("SELECT NOW() AS current_time");
@@ -62,7 +55,6 @@ app.get("/api/health/db", async (_req, res) => {
   }
 });
 
-// Authenticated user endpoint
 app.get("/api/auth/me", authenticate, (_req, res) => {
   const user = res.locals.user as AuthUser;
 
